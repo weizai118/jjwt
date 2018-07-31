@@ -17,6 +17,45 @@ and is supported and maintained by a [community](https://github.com/jwtk/jjwt/gr
 We've also added some convenience extensions that are not part of the specification, such as JWT compression and claim 
 enforcement.
 
+## Table of Contents
+
+* [Features](#Features)
+  * [Currently Unsupported Features](#features-unsupported)
+* [What is a JSON Web Token?](#what-is-a-json-web-token)
+* [Installation](#install)
+  * [JDK Projects](#install-jdk)
+    * [Maven](#install-jdk-maven)
+    * [Gradle](#install-jdk-gradle)
+  * [Android Projects](#install-android)
+    * [Dependencies](#install-android-dependencies)
+    * [Proguard Exclusions](#install-android-proguard)
+  * [Understanding JJWT Dependencies](#install-understanding-dependencies)
+* [Quickstart](#quickstart)
+* [Signed JWTs](#jws)
+  * [Signature Algorithm Keys](#jws-sigkey)
+    * [HMAC-SHA](#jws-sigkey-hmacsha)
+    * [RSA](#jws-sigkey-rsa)
+    * [Elliptic Curve](#jws-sigkey-ecdsa)
+    * [Creating Safe Keys](#jws-sigkey-safe)
+      * [Secret Keys](#jws-sigkey-safe-secret)
+      * [Asymetric Keys](#jws-sigkey-safe-asym)
+  * [Create a JWS](#jws-create)
+    * [Header](#jws-header)
+      * [Instance](#jws-header-instance)
+      * [Map](#jws-header-map)
+    * [Claims](#jws-claims)
+      * [Standard Claims](#jws-claims-standard)
+      * [Custom Claims](#jws-claims-custom)
+      * [Claims Instance](#jws-claims-instance)
+      * [Claims Map](#jws-claims-map)
+    * [Signing Key](#jws-signing-key)
+      * [Signature Algorithm Override]($jws-sigalg-override)
+    * [Compression](#jws-compression)
+    * [JSON Serialization](#jws-json-serialization)
+      * [Custom](#jws-json-serialization-custom)
+      * [Jackson](#jws-json-serialization-jackson)
+    * [Base64URL Encoding](#jws-base64url-encoding)
+
 ## Features
 
  * Fully functional on all JDKs and Android
@@ -48,6 +87,7 @@ enforcement.
     * Secure Key generation based on desired JWA algorithms
     * and more...
     
+<a name="features-unsupported"></a>
 ### Currently Unsupported Features
 
 * [Non-compact](https://tools.ietf.org/html/rfc7515#section-7.2) serialization and parsing.
@@ -55,6 +95,7 @@ enforcement.
 
 These features will be implemented in a future release.  Community contributions are welcome!
 
+<a name="what-is-a-json-web-token"></a>
 ## What is a JSON Web Token?
 
 Don't know what a JSON Web Token is? Read on. Otherwise, jump on down to the [Installation](#Installation) section.
@@ -116,6 +157,7 @@ The dependencies could differ slightly if you are working with a [JDK project](#
 
 If you're building a (non-Android) JDK project, you will want to define the following dependencies:
 
+<a name="install-jdk-maven"></a>
 #### Maven
 
 ```xml
@@ -151,6 +193,7 @@ If you're building a (non-Android) JDK project, you will want to define the foll
 Note: The above `jjwt-jackson` dependency assumes you're using Jackson 2.x.  If you're using Jackson 1.x, 
 please [read this](#olderJackson)
 
+<a name="install-jdk-gradle"></a>
 #### Gradle
 
 ```groovy
@@ -168,6 +211,7 @@ dependencies {
 
 Android projects will want to define the following dependencies and Proguard exclusions:
 
+<a name="install-android-dependencies"></a>
 #### Dependencies
 
 Add the dependencies to your project:
@@ -184,6 +228,7 @@ dependencies {
 }
 ```
 
+<a name="install-android-proguard"></a>
 #### Proguard
 
 You can use the following [Android Proguard](https://developer.android.com/studio/build/shrink-code) exclusion rules: 
@@ -200,6 +245,7 @@ You can use the following [Android Proguard](https://developer.android.com/studi
 -dontwarn org.bouncycastle.**
 ```
 
+<a name="install-understanding-dependencies"></a>
 ### Understanding JJWT Dependencies
 
 Notice the above dependency declarations all have only one compile-time dependency and the rest are declared as 
@@ -220,6 +266,7 @@ runtime `jjwt-impl` .jar strategy affords the JJWT developers the flexibility to
 implementations whenever and however necessary.  This helps us implement features, fix bugs, and ship new releases to 
 you more quickly and efficiently.
 
+<a name="quickstart"></a>
 ## Quickstart
 
 Most complexity is hidden behind a convenient and readable builder-based [fluent interface](http://en.wikipedia.org/wiki/Fluent_interface), great for relying on IDE auto-completion to write code quickly.  Here's an example:
@@ -281,6 +328,7 @@ try {
 }
 ```
 
+<a name="jws"></a>
 ## Signed JWTs
 
 The JWT specification provides for the ability to 
@@ -362,6 +410,7 @@ But before we dig in to showing you how to create a JWS using JJWT, let's briefl
 Keys, specifically as they relate to the JWT specifications.  Understanding them is critical to being able to create a 
 JWS properly.
 
+<a name="jws-sigkey"></a>
 ### Signature Algorithms Keys
 
 The JWT specification identifies 12 standard signature algorithms - 3 secret key algorithms and 9 asymmetric 
@@ -397,6 +446,7 @@ one wants completely insecure JWTs, right?  Neither would we.
 
 So what are the requirements?
 
+<a name="jws-sigkey-hmacsha"></a>
 #### HMAC-SHA
 
 JWT HMAC-SHA signature algorithms `HS256`, `HS384`, and `HS512` require a secret key that is _at least_ as many bits as
@@ -412,6 +462,7 @@ This means:
 * `HS512` is HMAC-SHA-512, and that produces digests that are 512 bits (64 bytes) long, so `HS512` _requires_ that you
   use a secret key that is at least 64 bytes long. 
   
+<a name="jws-sigkey-rsa"></a>
 #### RSA
 
 JWT RSA signature algorithms `RS256`, `RS384`, `RS512`, `PS256`, `PS384` and `PS512` all require a minimum key length
@@ -429,6 +480,7 @@ recoommends that you use:
 These are only JJWT suggestions and not requirements: JJWT only enforces JWT specification requirements and
 for any RSA key, that requirement the key length in bits MUST be >= 2048 bits.
 
+<a name="jws-sigkey-ecdsa"></a>
 #### Elliptic Curve
 
 JWT Elliptic Curve signature algorithms `ES256`, `ES384`, and `ES512` all require a minimum key length
@@ -441,12 +493,14 @@ components per [RFC 7512 Section 3.4](https://tools.ietf.org/html/rfc7518#sectio
 
 * `ES512` requires that you use a private key that is at least 512 bits (64 bytes) long.
 
+<a name="jws-sigkey-safe"></a>
 #### Creating Safe Keys
 
 If you don't want to think about bit length requirements or just want to make your life easier, JJWT has
 provided the `io.jsonwebtoken.security.Keys` utility class that can generate sufficiently secure keys for any given
 JWT signature algorithm you might want to use.
 
+<a name="jws-sigkey-safe-secret"></a>
 ##### Secret Keys
 
 If you want to generate a sufficiently strong `SecretKey` for use with the JWT HMAC-SHA algorithms, use the 
@@ -467,6 +521,7 @@ byte[] keyBytes = getSigningKeyFromApplicationConfiguration();
 SecretKey key = Keys.hmacShaKeyFor(keyBytes);
 ```
 
+<a name="jws-sigkey-safe-asym"></a>
 ##### Asymmetric Keys
 
 If you want to generate sufficiently strong Elliptic Curve or RSA asymmetric key pairs for use with JWT ECDSA or RSA
@@ -484,6 +539,7 @@ default.**  If you want to use them, you must enable a JCA provider in the JDK t
 (such as BouncyCastle).  See the [Installation](#Installation) section to see how to enable BouncyCastle if you want
 to usse these algorithms.
 
+<a name="jws-create"></a>
 ### Creating a JWS
 
 You create a JWS as follows:
@@ -505,7 +561,7 @@ String jws = Jwts.builder() // (1)
     .compact();             // (4)
 ```
 
-<a name="header"></a>
+<a name="jws-header"></a>
 #### Header Parameters
 
 A JWT Header provides metadata about the contents, format and cryptographic operations relevant to the JWT's Claims.
@@ -529,7 +585,7 @@ potentially overwriting any existing identically-named key/value pair.
 **NOTE**: You do not need to set the `alg` or `zip` header parameters as JJWT will set them automatically
 depending on the signature algorithm or compression algorithm used.
 
-<a name="header-instance"></a>
+<a name="jws-header-instance"></a>
 ##### Header Instance
 
 If you want to specify the entire header at once, you can use the `Jwts.header()` method and build up the header
@@ -553,7 +609,7 @@ String jws = Jwts.builder()
 already been set. In all cases however, JJWT will still set (and overwrite) any `alg` and `zip` headers regardless 
 if those are in the specified `header` object or not.
 
-<a name="header-map"></a>
+<a name="jws-header-map"></a>
 ##### Header Map
 
 If you want to specify the entire header at once and you don't want to use `Jwts.header()`, you can use `JwtBuilder` 
@@ -576,12 +632,12 @@ String jws = Jwts.builder()
 already been set. In all cases however, JJWT will still set (and overwrite) any `alg` and `zip` headers regardless 
 if those are in the specified `header` object or not.
 
-<a name="claims"></a>
+<a name="jws-claims"></a>
 #### Claims
 
 Claims are a JWT's 'body' and contain the information that the JWT creator wishes to present to the JWT recipient(s).
 
-<a name="claims-standard"></a>
+<a name="jws-claims-standard"></a>
 ##### Standard Claims
 
 The `JwtBuilder` provides convenient setter methods for standard registered Claim names defined in the JWT 
@@ -612,7 +668,7 @@ String jws = Jwts.builder()
     /// ... etc ...
 ```
 
-<a name="claims-custom"></a>
+<a name="jws-claims-custom"></a>
 ##### Custom Claims
 
 If you need to set one or more custom claims that don't match the standard setter method claims shown above, you
@@ -633,7 +689,7 @@ overwriting any existing identically-named key/value pair.
 Obviously, you do not need to call `claim` for any [standard claim name](#claims-standard) and it is recommended
 instead to call the standard respective setter method as this enhances readability.
 
-<a name="claims-instance"></a>
+<a name="jws-claims-instance"></a>
 ###### Claims Instance
 
 If you want to specify all claims at once, you can use the `Jwts.claims()` method and build up the claims
@@ -656,7 +712,7 @@ String jws = Jwts.builder()
 **NOTE**: Calling `setClaims` will overwrite any existing claim name/value pairs with the same names that might have 
 already been set.
 
-<a name="claims-instance"></a>
+<a name="jws-claims-map"></a>
 ###### Claims Map
 
 If you want to specify all claims at once and you don't want to use `Jwts.claims()`, you can use `JwtBuilder` 
@@ -677,6 +733,7 @@ String jws = Jwts.builder()
 **NOTE**: Calling `setClaims` will overwrite any existing claim name/value pairs with the same names that might have 
 already been set.
 
+<a name="jws-signing-key"></a>
 #### Signing Key
 
 It is recommended that you specify the signing key by calling call the `JwtBuilder`'s `signWith` method and let JJWT
@@ -706,6 +763,7 @@ The same selection logic applies for Elliptic Curve `PrivateKey`s.
 **NOTE: You cannot sign JWTs with `PublicKey`s as this is always insecure.** JJWT will reject any specified
 `PublicKey` for signing with an `InvalidKeyException`. 
 
+<a name="jws-sigalg-override"></a>
 ##### SignatureAlgorithm Override
 
 In some specific cases, you might want to override JJWT's default selected algorithm for a given key.
@@ -729,6 +787,7 @@ bits.
 **In all cases however, regardless of your chosen algorithms, JJWT will assert that the specified key is allowed to be 
 used for that algorithm according to the JWT specification requirements.**
 
+<a name="jws-compression"></a>
 #### Body Compression
 
 **WARNING: THIS IS NOT A JWS STANDARD FEATURE:** The JWT specification only standardizes this feature for JWEs 
@@ -755,6 +814,7 @@ If you want to compress your JWS body before signing, you can use the `JwtBuilde
 
 ``` 
 
+<a name="jws-json-serialization"></a>
 #### JSON Serialization
 
 A `JwtBuilder` will serialize the `Header` and `Claims` maps (and potentially any Java objects they 
@@ -777,7 +837,8 @@ Object-to-JSON marshaling, but it *does not* support JSON-to-Object unmarshallin
 **If you want to use POJOs as claim values, use the `io.jsonwebtoken:jjwt-jackson` dependency** (or implement your own
 Serializer and Deserializer if desired).  **But beware**, Jackson will force a sizable (> 1 MB) dependency to an 
 Android application increasing the app download size for mobile users.
-   
+
+<a name="jws-json-serialization-custom"></a>
 ##### Custom JSON Serializer
 
 If you don't want to use JJWT's runtime dependency approach, or just want to customize how JSON serialization works, 
@@ -795,6 +856,7 @@ String jws = Jwts.builder()
 
 ```
 
+<a name="jws-json-serialization-jackson"></a>
 ##### Jackson JSON Serializer
 
 If you have an application-wide Jackson `ObjectMapper` (as is typically recommended for most applications), you can 
@@ -836,6 +898,7 @@ String jws = Jwts.builder()
 
 ```
 
+<a name="jws-base64url-encoding"></a>
 #### Base64 URL Encoding
 
 JJWT uses a very fast pure-Java [Base64](https://tools.ietf.org/html/rfc4648) codec for Base64 and 
