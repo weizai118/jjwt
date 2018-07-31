@@ -861,9 +861,9 @@ String jws = Jwts.builder()
 ##### Jackson JSON Serializer
 
 If you have an application-wide Jackson `ObjectMapper` (as is typically recommended for most applications), you can 
-eliminate the overhead of having JJWT construct it's own `ObjectMapper` instance and have it use yours instead.
+eliminate the overhead of JJWT constructing its own `ObjectMapper` by using yours instead.
 
-You do this by declaring the `io.jsonwebtoken.jjwt-jackson` dependency with **compile** scope (not runtime 
+You do this by declaring the `io.jsonwebtoken:jjwt-jackson` dependency with **compile** scope (not runtime 
 scope which is the typical JJWT default).  That is:
 
 **Maven**
